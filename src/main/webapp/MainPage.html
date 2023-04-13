@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Info and Password</title>
+    <style>
+        #role {
+            background-color: green;
+            padding: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        var storedUser = JSON.parse(localStorage.getItem('token'));
+        var test = "";
+        var fileURL = "";
+        var ola;
+
+        window.onload = async function () {
+            storedUser = JSON.parse(localStorage.getItem('token'));
+            const username = storedUser.username;
+            const role = storedUser.role;
+            try {
+                const response = await fetch('/rest/utils/userPFP', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(storedUser)
+                });
+
+                if (!response.ok) {
+                }
+                test = await response.text();
+                document.getElementById("userPFP").setAttribute("src", test);
+
+            } catch (error) {
+            }
+            document.getElementById('username').innerText = 'Username: ' + username;
+            document.getElementById('role').innerText = 'Role: ' + role;
+        }
+
+        function showSections(sectionIds) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                if (sectionIds.includes(section.id)) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+        }
+
+        //Codigo JavaScript para "Remoção de utilizadores - OP2"
+        async function removeUser(event) {
+            event.preventDefault();
+
+
+            const data = {
+                token: storedUser,
+                usernameToDelete: document.getElementById('usernameToDelete').value
+            };
+
+            try {
+                const response = await fetch('/rest/delete/OP2', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.status == 401) {
+                    window.location.href = 'loginPage.html';
+                    alert('Invalid token');
+                } else if (response.status == 200) {
+                    alert('Usuário removido com sucesso!');
+                    if (storedUser.username == document.getElementById('usernameToDelete').value) {
+                        localStorage.removeItem('token');
+                        window.location.href = 'loginPage.html';
+                    }
+                } else {
+                    throw new Error(await response.text());
+                }
+            } catch (error) {
+                alert('Erro ao remover usuário: ' + error.message);
+            }
+        }
+        //Codigo JavaScript para "Remoção de utilizadores - OP2"
+
+        //Codigo JavaScript para "Listar utilizadores - OP3"
+        async function listUsers() {
+            try {
+                const response = await fetch('/rest/list/OP3', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(storedUser)
+                });
+
+                if (response.status == 401) {
+                    window.location.href = 'loginPage.html';
+                    alert('Invalid token');
+                } else if (response.status == 200) {
+                    const userDataList = await response.json();
+                    displayUserDataList(userDataList);
+                } else {
+                    throw new Error(await response.text());
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function displayUserDataList(userDataList) {
+            const tableElement = document.getElementById('userList-table');
+            tableElement.innerHTML = '';
+
+            // Obter todas as chaves únicas nos objetos userDataList
+            const allKeys = new Set();
+            userDataList.forEach(userData => {
+                for (const key in userData) {
+                    allKeys.add(key);
+                }
+            });
+
+            // Criar o cabeçalho da tabela
+            const headerRow = document.createElement('tr');
+            allKeys.forEach(key => {
+                const headerCell = document.createElement('th');
+                headerCell.textContent = key;
+                headerRow.appendChild(headerCell);
+            });
+            tableElement.appendChild(headerRow);
+
+            // Preencher a tabela com os dados
+            userDataList.forEach(userData => {
+                const tableRow = document.createElement('tr');
+
+                allKeys.forEach(key => {
+                    const tableCell = document.createElement('td');
+                    tableCell.textContent = userData[key] || '-';
+                    tableRow.appendChild(tableCell);
+                });
+
+                tableElement.appendChild(tableRow);
+            });
+        }
+
+        function listAllUsers() {
+            showSections(['listAllUsers']);
+            listUsers();
+        }
+        //Codigo JavaScript para "Listar utilizadores - OP3"
+
+        //Código JavaScript para "Modificação de atributos de contas de utilizadores - OP4"
+        async function updateUserAttributes() {
+            const targetUsername = document.getElementById('target-username').value;
+
+            if (document.getElementById("pfp").files[0] != null) {
+                uploadFile(storedUser.username);
+            }
+
+            const updateAttributesData = {
+                token: storedUser,
+                targetUsername: targetUsername,
+                data: {
+                    email: document.getElementById('emailUpdate').value,
+                    name: document.getElementById('nameUpdate').value,
+                    revealPerfil: document.getElementById('reveal-perfilUpdate').value === 'true',
+                    telefone: document.getElementById('telefoneUpdate').value ? Number(document.getElementById('telefoneUpdate').value) : null,
+                    telemovel: document.getElementById('telemovelUpdate').value ? Number(document.getElementById('telemovelUpdate').value) : null,
+                    ocupacao: document.getElementById('ocupacaoUpdate').value,
+                    localTrabalho: document.getElementById('local-trabalhoUpdate').value,
+                    morada1: document.getElementById('morada1Update').value,
+                    morada2: document.getElementById('morada2Update').value,
+                    pfpURL: fileURL,
+                    nif: document.getElementById('nifUpdate').value ? Number(document.getElementById('nifUpdate').value) : null,
+                    role: document.getElementById('roleUpdate').value,
+                    estado: document.getElementById('estadoUpdate').value
+                }
+            };
+
+            try {
+                const response = await fetch('/rest/changeAttribute/OP4', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateAttributesData)
+                });
+
+                if (response.status == 401) {
+                    window.location.href = 'loginPage.html';
+                    alert('Invalid token');
+                } else if (response.status == 200) {
+                    const result = response.json();
+                    alert('User attributes updated');
+                } else {
+                    throw new Error(await response.text());
+                }
+            } catch (error) {
+                alert('Error updating user attributes: ' + error);
+            }
+        }
+
+        function showCorrectOptions() {
+            if (storedUser != null && storedUser.role != "USER") {
+                showSections(['changeInfoSectionNU', 'changeInfoSectionU']);
+            }
+            else {
+                showSections(['changeInfoSectionU']);
+            }
+        }
+        //Código JavaScript para "Modificação de atributos de contas de utilizadores - OP4"
+
+        //Código JavaScript para "Modificação de password - OP5"
+        async function updatePassword(event) {
+            event.preventDefault();
+
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                alert('New password and confirm password do not match.');
+                return;
+            }
+
+            const data = {
+                token: storedUser,
+                data: {
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                    newPasswordConfirmation: confirmPassword
+                }
+            };
+
+            try {
+                const response = await fetch('/rest/changeAttribute/OP5', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.status == 401) {
+                    window.location.href = 'loginPage.html';
+                    alert('Invalid token');
+                } else if (response.status == 200) {
+                    alert('Password updated successfully!');
+                    document.getElementById('oldPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    throw new Error(await response.text());
+                }
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+        //Código JavaScript para "Modificação de password - OP5"
+
+        //Codigo JavaScript para "Mostrar o token de sessão - OP7"
+        function showToken(tokenDetails) {
+            let output = '';
+
+            output += 'username: ' + tokenDetails.username + '\n';
+            output += 'role: ' + tokenDetails.role + '\n';
+            output += 'creationDate: ' + new Date(tokenDetails.creationDate).toLocaleString() + '\n';
+            output += 'expirationDate: ' + new Date(tokenDetails.expirationDate).toLocaleString() + '\n';
+            output += 'tokenID: ' + tokenDetails.tokenID;
+
+            document.getElementById('details').innerText = output;
+        }
+
+        function showTokenPage() {
+            if (storedUser == null) {
+                window.location.href = 'loginPage.html';
+                alert('Invalid token');
+            } else {
+                showSections(['showToken']);
+                showToken(storedUser);
+            }
+        }
+        //Codigo JavaScript para "Mostrar o token de sessão - OP7"
+
+        //Codigo JavaScript para "Logout - OP8"
+        async function logout() {
+            try {
+                const response = await fetch('/rest/logout/OP8', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(storedUser)
+                });
+
+                if (response.status == 401) {
+                    window.location.href = 'loginPage.html';
+                    alert('Invalid token');
+                } else if (response.status == 200) {
+                    localStorage.removeItem('token');
+                    alert('Logout successful');
+                    window.location.href = 'index.html'; // Redirecionar para outra página
+                } else {
+                    throw new Error(await response.text());
+                }
+
+            } catch (error) {
+                alert('Error during logout: ' + error.message);
+            }
+        }
+        //Codigo JavaScript para "Logout - OP8"
+
+        function uploadFile(username) {
+            var googleAPI = "https://storage.googleapis.com/";
+            var bucket = "calm-sky-379312.appspot.com";
+            var file = document.getElementById("pfp").files[0];
+            var filename = username + file.name;
+
+            if (bucket == null || bucket == "" || filename == null || filename == "") {
+                alert("Both Bucket and FileName are required");
+                return false;
+            } else {
+                var request = new XMLHttpRequest();
+                request.open("POST", "/gcs/" + bucket + "/" + filename, false);
+                request.setRequestHeader("Content-Type", file.type);
+                request.send(file);
+                fileURL = googleAPI + bucket + "/" + filename;
+            }
+        }
+
+    </script>
+</head>
+
+<body>
+    <h1>User Info</h1>
+    <p id="username"></p>
+    <p id="role"></p>
+    <img src="" id="userPFP" height="40px" width="40px"></img>
+    <br>
+    <button onclick="showSections(['removeUser'])">Remove user</button>
+    <button onclick="listAllUsers()">List all users</button>
+    <button onclick="showCorrectOptions()">Change Information</button>
+    <button onclick="showSections(['changePasswordSection'])">Change Password</button>
+    <button onclick="showTokenPage()">Show token</button>
+    <button onclick="logout()">Logout</button>
+
+
+    <div id="removeUser" class="hidden section">
+        <h2>Remove a user</h2>
+        <div>
+            <label for="usernameToDelete">Username to delete:</label>
+            <input type="text" id="usernameToDelete">
+            <button onclick="removeUser(event)">Apagar conta</button>
+        </div>
+    </div>
+
+    <div id="listAllUsers" class="section">
+        <h2>All user list</h2>
+        <table id="userList-table"></table>
+    </div>
+
+    <div id="changeInfoSectionNU" class="hidden section">
+        <h2>Change Information</h2>
+        <label for="target-username">Target Username:</label>
+        <input type="text" id="target-username" required>
+        <br>
+        <label for="email">Email:</label>
+        <input type="email" id="emailUpdate">
+        <br>
+        <label for="name">Name:</label>
+        <input type="text" id="nameUpdate">
+        <br>
+        <label for="role">Role:</label>
+        <select id="roleUpdate">
+            <option value="SU">SU</option>
+            <option value="GS">GS</option>
+            <option value="GA">GA</option>
+            <option value="GBO">GBO</option>
+            <option value="USER">USER</option>
+        </select>
+        <br>
+        <label for="estado">Estado:</label>
+        <select id="estadoUpdate">
+            <option value="ATIVO">ATIVO</option>
+            <option value="INATIVO">INATIVO</option>
+        </select>
+    </div>
+    <div id="changeInfoSectionU" class="hidden section">
+        <br>
+        <label for="reveal-perfil">Reveal Perfil:</label>
+        <select id="reveal-perfilUpdate">
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+        </select>
+        <br>
+        <label for="telefone">Telefone:</label>
+        <input type="number" id="telefoneUpdate">
+        <br>
+        <label for="telemovel">Telemovel:</label>
+        <input type="number" id="telemovelUpdate">
+        <br>
+        <label for="ocupacao">Ocupacao:</label>
+        <input type="text" id="ocupacaoUpdate">
+        <br>
+        <label for="local-trabalho">Local Trabalho:</label>
+        <input type="text" id="local-trabalhoUpdate">
+        <br>
+        <label for="morada1">Morada 1:</label>
+        <input type="text" id="morada1Update">
+        <br>
+        <label for="local-trabalho">Morada 2:</label>
+        <input type="text" id="morada2Update">
+        <br>
+        <label for="nif">NIF:</label>
+        <input type="number" id="nifUpdate">
+        <br>
+        <div>
+            profilePic: <input type="file" name="files" id="pfp" accept="image/jpeg, image/png" />
+        </div>
+        <button onclick="updateUserAttributes()">Update User Attributes</button>
+    </div>
+
+    <div id="changePasswordSection" class="section hidden">
+        <h2>Change Password</h2>
+        <form onsubmit="updatePassword(event)">
+            <div>
+                <label for="oldPassword">Old Password:</label>
+                <input type="password" id="oldPassword" required>
+            </div>
+            <div>
+                <label for="newPassword">New Password:</label>
+                <input type="password" id="newPassword" required>
+            </div>
+            <div>
+                <label for="confirmPassword">Confirm New Password:</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <button type="submit">Update Password</button>
+        </form>
+    </div>
+
+    <div id="showToken" class="section hidden">
+        <h2>Token Details</h2>
+        <pre id="details"></pre>
+    </div>
+
+</body>
+
+</html>

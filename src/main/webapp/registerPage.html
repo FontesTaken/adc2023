@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuário</title>
+    <style>
+        /* Adicione seus estilos aqui */
+    </style>
+    <script>
+        var fileURL = "";
+        function nullIfEmpty(value) {
+            return value === '' ? null : value;
+        }
+
+        async function registerAccount(event) {
+            event.preventDefault();
+
+            const form = document.getElementById('register-form');
+            const formData = new FormData(form);
+
+            if (document.getElementById("pfp").files[0] != null) {
+                uploadFile(formData.get('username'));
+                console.log("pfp uploeaded");
+            }
+
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                name: formData.get('name'),
+                password: formData.get('password'),
+                passwordRepeat: formData.get('passwordRepeat'),
+                revealPerfil: formData.get('revealPerfil') === 'true',
+                telefone: nullIfEmpty(formData.get('telefone')),
+                telemovel: nullIfEmpty(formData.get('telemovel')),
+                ocupacao: nullIfEmpty(formData.get('ocupacao')),
+                localTrabalho: nullIfEmpty(formData.get('localTrabalho')),
+                morada1: nullIfEmpty(formData.get('morada1')),
+                morada2: nullIfEmpty(formData.get('morada2')),
+                pfpURL: fileURL,
+                nif: nullIfEmpty(formData.get('nif'))
+            };
+
+            try {
+                const response = await fetch('/rest/register/OP1', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+
+                alert('Account registered!');
+                window.location.href = 'index.html';
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+        function uploadFile(username) {
+            var googleAPI = "https://storage.googleapis.com/";
+            var bucket = "calm-sky-379312.appspot.com";
+            var file = document.getElementById("pfp").files[0];
+            var filename = username + file.name;
+
+            if (bucket == null || bucket == "" || filename == null || filename == "") {
+                alert("Both Bucket and FileName are required");
+                return false;
+            } else {
+                var request = new XMLHttpRequest();
+                request.open("POST", "/gcs/" + bucket + "/" + filename, false);
+                request.setRequestHeader("Content-Type", file.type);
+                request.send(file);
+                fileURL = googleAPI + bucket + "/" + filename;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <form id="register-form" onsubmit="registerAccount(event)">
+            <h2>Registro de Usuário</h2>
+            <!-- Campos obrigatórios -->
+            <div class="input-group">
+                <label for="username">Nome de usuário</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="input-group">
+                <label for="name">Nome</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="input-group">
+                <label for="passwordRepeat">Repetir Senha</label>
+                <input type="password" id="passwordRepeat" name="passwordRepeat" required>
+            </div>
+            <!-- Campos opcionais -->
+            <div class="input-group">
+                <label for="revealPerfil">Revelar Perfil</label>
+                <select id="revealPerfil" name="revealPerfil">
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone">
+            </div>
+            <div class="input-group">
+                <label for="telemovel">Telemóvel</label>
+                <input type="tel" id="telemovel" name="telemovel">
+            </div>
+            <div class="input-group">
+                <label for="ocupacao">Ocupação</label>
+                <input type="text" id="ocupacao" name="ocupacao">
+            </div>
+            <div class="input-group">
+                <label for="localTrabalho">Local de Trabalho</label>
+                <input type="text" id="localTrabalho" name="localTrabalho">
+            </div>
+            <div class="input-group">
+                <label for="nif">NIF</label>
+                <input type="number" id="nif" name="nif">
+            </div>
+            <div class="input-group">
+                <label for="morada1">Morada 1</label>
+                <input type="text" id="morada1" name="morada1">
+            </div>
+            <div class="input-group">
+                <label for="morada2">Morada 2</label>
+                <input type="text" id="morada2" name="morada2">
+            </div>
+            <div>
+                profilePic: <input type="file" name="files" id="pfp" accept="image/jpeg, image/png" />
+            </div>
+
+            <!-- Botão de registro -->
+            <div class="input-group">
+                <button type="submit">Registrar</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

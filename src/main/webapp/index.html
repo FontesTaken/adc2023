@@ -1,26 +1,57 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-  <head>
-    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-    <title>My First Web Aoo</title>
-  </head>
 
-  <body>
-    <h1>Welcome to my simple web application!</h1>
+<head>
+  <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
+  <title>My First Web Aoo</title>
+  <script>
+    window.onload = async function checkInput() {
+      event.preventDefault();
+      try {
+        // Chamar a API REST de login no back-end Java
+        const response = await fetch('/rest/register/AdminOP1', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+      } catch (error) {
+        alert(error.message);
+      }
+    }      
+  </script>
+</head>
 
-    <table>
-      <tr>
-        <td colspan="2" style="font-weight:bold;">Available Services:</td>        
-      </tr>
-      <tr>
-        <td><a href='/rest/utils/hello'>Say Hello!</a></td><td>(greetings)</td>
-      </tr>
-      <tr>
-        <td><a href='/rest/utils/time'>What time is it?</a></td><td>(see server time)</td>
-      </tr>
-    </table>
-  </body>
-  <footer>
-  	Copyright: FCT NOVA 2023
-  </footer>
+<body>
+  <h1>Welcome to my simple web application!</h1>
+
+  <table>
+    <tr>
+      <td colspan="2" style="font-weight:bold;">Available Services:</td>
+    </tr>
+    <tr>
+      <td><a href='/rest/utils/hello'>Say Hello!</a></td>
+      <td>(greetings)</td>
+    </tr>
+    <tr>
+      <td><a href='/rest/utils/time'>What time is it?</a></td>
+      <td>(see server time)</td>
+    </tr>
+    <tr>
+      <td><a href='registerPage.html'>Register</a></td>
+      <td>(go to the user register page)</td>
+    </tr>
+    <!--<tr>
+        <td><a href='registerAdminPage.html'>Register Admin User</a></td><td>(go to the admin register page)</td>
+      </tr>-->
+    <tr>
+      <td><a href='loginPage.html'>Login</a></td>
+      <td>(go to the login page)</td>
+    </tr>
+  </table>
+</body>
+<footer>
+  Copyright: FCT NOVA 2023
+</footer>
+
 </html>
