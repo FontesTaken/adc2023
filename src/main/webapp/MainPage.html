@@ -109,9 +109,9 @@
 
                 if (response.ok) {
                     alert('Usuário removido com sucesso!');
-                    document.getElementById('usernameToDelete').value = "";
                     if (storedUser.username == document.getElementById('usernameToDelete').value) {
                         localStorage.removeItem('token');
+                        document.getElementById('usernameToDelete').value = "";
                         window.location.href = 'loginPage.html';
                     }
                 } else {

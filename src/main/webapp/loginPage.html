@@ -15,14 +15,12 @@
                 var username = document.getElementById('username').value;
                 var password = document.getElementById('password').value;
 
-                // Construa um objeto JSON com as informações de login
                 const loginData = {
                     username: username,
                     password: password
                 };
 
                 try {
-                    // Chamar a API REST de login no back-end Java
                     const response = await fetch('/rest/login/OP6', {
                         method: 'POST',
                         headers: {
@@ -32,18 +30,18 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error('Login failed: ' + response.statusText);
+                        const error = await response.text();
+                        alert(`Error: ${error}`);
                     }
 
                     const result = await response.json();
-                    // Armazene o username e o tokenID no armazenamento local
                     const resultString = JSON.stringify(result);
                     localStorage.setItem('token', resultString);
 
 
                     window.location.href = 'MainPage.html';
                 } catch (error) {
-                    alert(error.message);
+                    //alert(`Error: ${error}`);
                 }
             });
         }
