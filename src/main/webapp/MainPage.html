@@ -531,34 +531,11 @@
         <table id="userList-table"></table>
     </div>
 
-    <div id="changeInfoSectionNU" class="hidden section">
-        <h2>Change Information</h2>
+    <div id="changeInfoSectionU" class="hidden section">
         <label for="target-username">Target Username:</label>
         <input type="text" id="target-username" required>
         <br>
-        <label for="email">Email:</label>
-        <input type="email" id="emailUpdate">
-        <br>
-        <label for="name">Name:</label>
-        <input type="text" id="nameUpdate">
-        <br>
-        <label for="role">Role:</label>
-        <select id="roleUpdate">
-            <option value="SU">SU</option>
-            <option value="GS">GS</option>
-            <option value="GA">GA</option>
-            <option value="GBO">GBO</option>
-            <option value="USER">USER</option>
-        </select>
-        <br>
-        <label for="estado">Estado:</label>
-        <select id="estadoUpdate">
-            <option value="ATIVO">ATIVO</option>
-            <option value="INATIVO">INATIVO</option>
-        </select>
-    </div>
-    <div id="changeInfoSectionU" class="hidden section">
-        <br>
+        <h2>Change Information</h2>
         <label for="reveal-perfil">Reveal Perfil:</label>
         <select id="reveal-perfilUpdate">
             <option value="true">Sim</option>
@@ -589,6 +566,32 @@
         <div>
             profilePic: <input type="file" name="files" id="pfp" accept="image/jpeg, image/png" />
         </div>
+        <button onclick="updateUserAttributes()">Update User Attributes</button>
+    </div>
+    <div id="changeInfoSectionNU" class="hidden section">
+        --------------------------------------------------
+        <h2>Change Information (adicional permissions)</h2>
+        <label for="email">Email:</label>
+        <input type="email" id="emailUpdate">
+        <br>
+        <label for="name">Name:</label>
+        <input type="text" id="nameUpdate">
+        <br>
+        <label for="role">Role:</label>
+        <select id="roleUpdate">
+            <option value="SU">SU</option>
+            <option value="GS">GS</option>
+            <option value="GA">GA</option>
+            <option value="GBO">GBO</option>
+            <option value="USER">USER</option>
+        </select>
+        <br>
+        <label for="estado">Estado:</label>
+        <select id="estadoUpdate">
+            <option value="ATIVO">ATIVO</option>
+            <option value="INATIVO">INATIVO</option>
+        </select>
+        <br>
         <button onclick="updateUserAttributes()">Update User Attributes</button>
     </div>
 
