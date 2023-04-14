@@ -1,10 +1,7 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -17,8 +14,10 @@ import javax.ws.rs.core.Response.Status;
 import com.google.gson.Gson;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import com.google.cloud.datastore.StructuredQuery.OrderBy;
 
 import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
+import pt.unl.fct.di.apdc.firstwebapp.util.MessageData;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserDataToList;
 
 import com.google.cloud.datastore.*;
@@ -27,11 +26,7 @@ import com.google.cloud.datastore.*;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ListResource {
 
-	private static final Logger LOG = Logger.getLogger(ComputationResource.class.getName());
-
 	private final Gson g = new Gson();
-
-	private static final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
 
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	
@@ -170,6 +165,61 @@ public class ListResource {
 		return userDataList;
 	}
 
-	
+	@POST
+	@Path("/OP10")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response listMessages(AuthToken token) {
+		if (token == null) {
+			return Response.status(Status.UNAUTHORIZED).entity("Missing token").build();
+		}
+		Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", token.username)).setKind("Token")
+				.newKey(token.tokenID);
+		Transaction txn = datastore.newTransaction();
+		try {
+			// Get token information
+			Entity tokenEntity = txn.get(tokenKey);
+			if (tokenEntity == null) {
+				return Response.status(Status.UNAUTHORIZED).entity("Token not found").build();
+			}
+			if (!token.isMyToken(tokenEntity))
+				return Response.status(Status.UNAUTHORIZED).entity("Token not valid").build();
+
+			if (System.currentTimeMillis() >= token.expirationDate) {
+				return Response.status(Status.UNAUTHORIZED).entity("Token expired").build();
+			}
+			List<MessageData> messages = new ArrayList<>();
+			Query<Entity> query = Query.newEntityQueryBuilder().setKind("Message")
+					.setOrderBy(OrderBy.desc("creationDate")).build();
+
+			QueryResults<Entity> results = datastore.run(query);
+			String role = tokenEntity.getString("role");
+			while (results.hasNext()) {
+				Entity entity = results.next();
+				MessageData message = new MessageData();
+				message.messageID = entity.getKey().getName();
+				message.username = entity.getString("username");
+				message.nameOfUser = entity.getString("nameOfUser");
+				message.content = entity.getString("content");
+				message.creationDate = entity.getLong("creationDate");
+
+				if (!role.equals("USER")) {
+					messages.add(message);
+				} else {
+					MessageData userMessage = new MessageData();
+					userMessage.username = message.username;
+					userMessage.nameOfUser = message.nameOfUser;
+					userMessage.content = message.content;
+					userMessage.creationDate = message.creationDate;
+					messages.add(userMessage);
+				}
+			}
+			return Response.ok(g.toJson(messages)).build();
+		} finally {
+			if (txn.isActive()) {
+				txn.rollback();
+			}
+		}
+	}
 
 }

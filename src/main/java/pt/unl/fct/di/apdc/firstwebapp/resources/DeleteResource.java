@@ -81,7 +81,7 @@ public class DeleteResource {
 					PropertyFilter.hasAncestor(userKey))
 					.build();
 
-			QueryResults<Key> tokenKeys = datastore.run(query);
+			QueryResults<Key> tokenKeys = txn.run(query);
 			
 			List<Key> keysToDelete = new ArrayList<>();
 			while (tokenKeys.hasNext()) {

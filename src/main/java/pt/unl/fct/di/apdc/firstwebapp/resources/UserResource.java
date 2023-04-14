@@ -1,7 +1,5 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import java.util.logging.Logger;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -21,8 +19,6 @@ import com.google.cloud.datastore.*;
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class UserResource {
 	
-	private static final Logger LOG = Logger.getLogger(ComputationResource.class.getName());
-
 	private final Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	
 	public UserResource () {

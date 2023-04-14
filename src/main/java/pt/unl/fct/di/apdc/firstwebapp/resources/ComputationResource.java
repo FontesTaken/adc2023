@@ -7,6 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.DELETE;
 
 import com.google.gson.Gson;
 import com.google.cloud.datastore.*;
@@ -29,9 +30,9 @@ public class ComputationResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUserPFP(AuthToken token) {
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
 			Entity userEntity = txn.get(userKey);
 			if (userEntity == null) {
 				return Response.status(Status.NOT_FOUND).entity("User not found").build();
@@ -50,9 +51,9 @@ public class ComputationResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUser(AuthToken token) {
+		Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
 		Transaction txn = datastore.newTransaction();
 		try {
-			Key userKey = datastore.newKeyFactory().setKind("User").newKey(token.username);
 			Entity userEntity = txn.get(userKey);
 			if (userEntity == null) {
 				return Response.status(Status.NOT_FOUND).entity("User not found").build();
@@ -64,6 +65,30 @@ public class ComputationResource {
 				txn.rollback();
 			}
 		}
+	}
+
+	@DELETE
+	@Path("/deleteAllEntities")
+	public Response deleteAllEntities() {
+		Query<Entity> query = Query.newEntityQueryBuilder().build();
+		QueryResults<Entity> results = datastore.run(query);
+
+		while (results.hasNext()) {
+			Entity entity = results.next();
+			Key key = entity.getKey();
+
+			Transaction txn = datastore.newTransaction();
+			try {
+				txn.delete(key);
+				txn.commit();
+			} finally {
+				if (txn.isActive()) {
+					txn.rollback();
+				}
+			}
+		}
+
+		return Response.ok("Todas as entidades foram excluídas.").build();
 	}
 
 }
