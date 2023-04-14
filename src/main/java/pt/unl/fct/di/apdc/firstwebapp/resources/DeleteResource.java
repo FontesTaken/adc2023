@@ -6,12 +6,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.PathElement;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.datastore.Transaction;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -36,7 +41,7 @@ public class DeleteResource {
 
 		if (request.usernameToDelete == null || request.usernameToDelete.equals(""))
 			return Response.status(Status.BAD_REQUEST).entity("Missing target username").build();
-		
+
 		Key tokenKey = datastore.newKeyFactory().addAncestor(PathElement.of("User", request.token.username))
 				.setKind("Token").newKey(request.token.tokenID);
 		Transaction txn = datastore.newTransaction();
@@ -71,6 +76,22 @@ public class DeleteResource {
 			if (!authorized) {
 				return Response.status(Status.FORBIDDEN).entity("Not authorized to remove this user").build();
 			}
+
+			Query<Key> query = Query.newKeyQueryBuilder().setKind("Token").setFilter(
+					PropertyFilter.hasAncestor(userKey))
+					.build();
+
+			QueryResults<Key> tokenKeys = datastore.run(query);
+			
+			List<Key> keysToDelete = new ArrayList<>();
+			while (tokenKeys.hasNext()) {
+			    keysToDelete.add(tokenKeys.next());
+			}
+
+			if (!keysToDelete.isEmpty()) {
+			    txn.delete(keysToDelete.toArray(new Key[0]));
+			}
+
 
 			// Remove user
 			txn.delete(userKey);

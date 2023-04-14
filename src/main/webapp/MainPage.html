@@ -17,28 +17,49 @@
         }
     </style>
     <script>
-        var storedUser = JSON.parse(localStorage.getItem('token'));
+        function getStoredUser() {
+            return JSON.parse(localStorage.getItem('token'));
+        }
+
+        var storedUser = getStoredUser();
         var test = "";
         var fileURL = "";
-        var ola;
 
         window.onload = async function () {
-            storedUser = JSON.parse(localStorage.getItem('token'));
-            const username = storedUser.username;
-            const role = storedUser.role;
+            storedUser = getStoredUser();
+            const username = getStoredUser().username;
+            const role = getStoredUser().role;
             try {
                 const response = await fetch('/rest/utils/userPFP', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(storedUser)
+                    body: JSON.stringify(getStoredUser())
                 });
 
                 if (!response.ok) {
                 }
                 test = await response.text();
                 document.getElementById("userPFP").setAttribute("src", test);
+
+            } catch (error) {
+            }
+            try {
+                const response = await fetch('/rest/utils/giveUser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(getStoredUser())
+                });
+
+                if (!response.ok) {
+                }
+                const userData = await response.json();
+                console.log(userData);
+                document.getElementById('name').innerText = 'Name: ' + userData.properties.name.value;
+                document.getElementById('email').innerText = 'Email: ' + userData.properties.email.value;
 
             } catch (error) {
             }
@@ -59,11 +80,8 @@
 
         //Codigo JavaScript para "Remoção de utilizadores - OP2"
         async function removeUser(event) {
-            event.preventDefault();
-
-
             const data = {
-                token: storedUser,
+                token: getStoredUser(),
                 usernameToDelete: document.getElementById('usernameToDelete').value
             };
 
@@ -81,7 +99,7 @@
                     alert('Invalid token');
                 } else if (response.status == 200) {
                     alert('Usuário removido com sucesso!');
-                    if (storedUser.username == document.getElementById('usernameToDelete').value) {
+                    if (getStoredUser().username == document.getElementById('usernameToDelete').value) {
                         localStorage.removeItem('token');
                         window.location.href = 'loginPage.html';
                     }
@@ -102,7 +120,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(storedUser)
+                    body: JSON.stringify(getStoredUser())
                 });
 
                 if (response.status == 401) {
@@ -165,11 +183,11 @@
             const targetUsername = document.getElementById('target-username').value;
 
             if (document.getElementById("pfp").files[0] != null) {
-                uploadFile(storedUser.username);
+                uploadFile(getStoredUser().username);
             }
 
             const updateAttributesData = {
-                token: storedUser,
+                token: getStoredUser(),
                 targetUsername: targetUsername,
                 data: {
                     email: document.getElementById('emailUpdate').value,
@@ -212,7 +230,7 @@
         }
 
         function showCorrectOptions() {
-            if (storedUser != null && storedUser.role != "USER") {
+            if (getStoredUser() != null && getStoredUser().role != "USER") {
                 showSections(['changeInfoSectionNU', 'changeInfoSectionU']);
             }
             else {
@@ -235,7 +253,7 @@
             }
 
             const data = {
-                token: storedUser,
+                token: getStoredUser(),
                 data: {
                     oldPassword: oldPassword,
                     newPassword: newPassword,
@@ -283,12 +301,12 @@
         }
 
         function showTokenPage() {
-            if (storedUser == null) {
+            if (getStoredUser() == null) {
                 window.location.href = 'loginPage.html';
                 alert('Invalid token');
             } else {
                 showSections(['showToken']);
-                showToken(storedUser);
+                showToken(getStoredUser());
             }
         }
         //Codigo JavaScript para "Mostrar o token de sessão - OP7"
@@ -301,7 +319,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(storedUser)
+                    body: JSON.stringify(getStoredUser())
                 });
 
                 if (response.status == 401) {
@@ -345,6 +363,8 @@
 <body>
     <h1>User Info</h1>
     <p id="username"></p>
+    <p id="name"></p>
+    <p id="email"></p>
     <p id="role"></p>
     <img src="" id="userPFP" height="40px" width="40px"></img>
     <br>
