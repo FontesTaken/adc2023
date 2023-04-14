@@ -1,7 +1,5 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
@@ -11,13 +9,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.DELETE;
 
 
 import com.google.gson.Gson;
-import com.google.cloud.datastore.StructuredQuery.OrderBy;
 
-import pt.unl.fct.di.apdc.firstwebapp.util.AuthToken;
 import pt.unl.fct.di.apdc.firstwebapp.util.MessageRequest;
 import pt.unl.fct.di.apdc.firstwebapp.util.MessageData;
 
@@ -26,8 +21,6 @@ import com.google.cloud.datastore.*;
 @Path("/feed")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class FeedResource {
-
-	private static final Logger LOG = Logger.getLogger(ComputationResource.class.getName());
 
 	private final Gson g = new Gson();
 
