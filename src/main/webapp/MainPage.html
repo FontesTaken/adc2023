@@ -78,6 +78,20 @@
             document.getElementById('username').innerText = 'Username: ' + username;
             document.getElementById('role').innerText = 'Role: ' + role;
             showCreateMessageButton();
+            const roleElement = document.getElementById('role');
+            if (role === 'SU') {
+                roleElement.style.backgroundColor = 'red';
+            } else if (role === 'USER') {
+                roleElement.style.backgroundColor = 'green';
+            }else if (role === 'GBO') {
+                roleElement.style.backgroundColor = 'yellow';
+            }else if (role === 'GS') {
+                roleElement.style.backgroundColor = 'orange';
+            }else if (role === 'GA') {
+                roleElement.style.backgroundColor = 'gray';
+            } else {
+                roleElement.style.backgroundColor = 'pink';
+            }
         }
 
         function showSections(sectionIds) {

@@ -35,4 +35,8 @@ public class UpdateUserAttributes {
 		this.role = role;
 		this.estado = estado;
 	}
+	
+	public boolean isRoleValid() {
+		return (role.equals("USER") || role.equals("GBO") || role.equals("GS") || role.equals("GA") || role.equals("SU"));
+	}
 }

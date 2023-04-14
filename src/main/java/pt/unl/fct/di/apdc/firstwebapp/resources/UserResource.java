@@ -37,6 +37,9 @@ public class UserResource {
 		if (!updateAttributesData.isUsernameValid())
 			return Response.status(Status.FORBIDDEN).entity("Username invalid").build();
 
+		if (!updateAttributesData.data.isRoleValid())
+			return Response.status(Status.FORBIDDEN).entity("Role invalid").build();
+		
 		Key tokenKey = datastore.newKeyFactory()
 				.addAncestor(PathElement.of("User", updateAttributesData.token.username)).setKind("Token")
 				.newKey(updateAttributesData.token.tokenID);
