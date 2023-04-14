@@ -337,7 +337,7 @@
                 if (response.ok) {
                     localStorage.removeItem('token');
                     alert('Logout successful');
-                    window.location.href = 'index.html';
+                    window.location.href = 'loginPage.html';
                 } else {
                     const error = await response.text();
                     alert(`Error: ${error}`);
